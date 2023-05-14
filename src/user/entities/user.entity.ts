@@ -35,9 +35,11 @@ export class User {
   @Exclude()
   passwordHash: string;
 
-  @OneToMany(() => Post, (post) => post.organizer)
+  @OneToMany(() => Post, (post) => post.organizer, { cascade: ['remove'] })
   posts: Post[];
 
-  @ManyToMany(() => Post, (post) => post.registeredUsers)
+  @ManyToMany(() => Post, (post) => post.registeredUsers, {
+    cascade: ['remove'],
+  })
   registeredEvents: Post[];
 }

@@ -102,4 +102,35 @@ export class PostController {
     if (userId != post.organizer.id) throw new ForbiddenException();
     return this.postService.remove(+id);
   }
+
+  @Post('register/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Register to the event of a post with ID' })
+  @ApiOkResponse({ description: 'Registered successfully.' })
+  @ApiNotFoundResponse({ description: 'Post with ID not found.' })
+  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
+  @ApiBearerAuth()
+  async register(@Param('id') id: string, @Request() req) {
+    const post = await this.postService.findOne(+id);
+    if (!post) throw new NotFoundException();
+    const userId = req.user.id;
+    return this.postService.registerUser(+id, userId);
+  }
+
+  @Get('register/:id')
+  async findRegisteredUsers(@Param('id') id: string) {
+    const post = await this.postService.findOne(+id);
+    if (!post) throw new NotFoundException();
+    return this.postService.findRegisteredUsers(+id);
+  }
+
+  @Delete('register/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async removeRegistration(@Param('id') id: string, @Request() req) {
+    const post = await this.postService.findOne(+id);
+    if (!post) throw new NotFoundException();
+    const userId = req.user.id;
+    return this.postService.removeRegistration(+id, userId);
+  }
 }

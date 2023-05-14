@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
@@ -11,6 +12,7 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private userService: UserService,
+    private connection: Connection,
   ) {}
 
   async create(createPostDto: CreatePostDto, organizerId: number) {
@@ -32,6 +34,11 @@ export class PostService {
     return this.postRepository.findOneBy({ id });
   }
 
+  async findRegisteredUsers(id: number): Promise<User[]> {
+    const post = await this.findOne(id);
+    return post.registeredUsers;
+  }
+
   async update(id: number, updatePostDto: UpdatePostDto) {
     const post = new Post();
     post.title = updatePostDto.title;
@@ -43,5 +50,26 @@ export class PostService {
 
   async remove(id: number) {
     await this.postRepository.delete(id);
+  }
+
+  async registerUser(id: number, userId: number) {
+    const post = await this.postRepository.findOneBy({ id });
+    const registeredUsers = post.registeredUsers;
+    if (registeredUsers.find((u) => u.id == userId)) return;
+    const user = await this.userService.findOne(userId);
+    registeredUsers.push(user);
+    const newPost = this.connection.getRepository(Post).create();
+    newPost.id = post.id;
+    newPost.registeredUsers = registeredUsers;
+    await this.connection.getRepository(Post).save(newPost);
+  }
+
+  async removeRegistration(id: number, userId: number) {
+    const post = await this.postRepository.findOneBy({ id });
+    const registeredUsers = post.registeredUsers;
+    const newPost = this.connection.getRepository(Post).create();
+    newPost.id = post.id;
+    newPost.registeredUsers = registeredUsers.filter((u) => u.id != userId);
+    await this.connection.getRepository(Post).save(newPost);
   }
 }

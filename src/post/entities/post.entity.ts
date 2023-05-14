@@ -41,7 +41,10 @@ export class Post {
     return this.organizer.id;
   }
 
-  @ManyToMany(() => User, (user) => user.registeredEvents)
+  @ManyToMany(() => User, (user) => user.registeredEvents, {
+    cascade: ['update'],
+    eager: true,
+  })
   @JoinTable()
   registeredUsers: User[];
 }
