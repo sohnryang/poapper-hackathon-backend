@@ -84,7 +84,7 @@ export class PostController {
   @ApiNotFoundResponse({ description: 'Post with ID not found.' })
   async register(
     @Param('id') id: string,
-    createRegistrationDto: CreateRegistrationDto,
+    @Body() createRegistrationDto: CreateRegistrationDto,
   ) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
@@ -101,7 +101,7 @@ export class PostController {
   @Delete('register/:id')
   async removeRegistration(
     @Param('id') id: string,
-    createRegistrationDto: CreateRegistrationDto,
+    @Body() createRegistrationDto: CreateRegistrationDto,
   ) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
