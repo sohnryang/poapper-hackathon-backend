@@ -84,7 +84,7 @@ export class UserController {
   @ApiOperation({ summary: 'Delete a user with id' })
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Deleted successfully.' })
-  @ApiNotFoundResponse({ description: 'User wit ID not found.' })
+  @ApiNotFoundResponse({ description: 'User with ID not found.' })
   @ApiForbiddenResponse({ description: 'Deleting other user.' })
   @ApiUnauthorizedResponse({ description: 'Invalid token.' })
   async remove(@Param('id') id: string, @Request() req) {
