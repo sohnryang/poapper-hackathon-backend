@@ -6,13 +6,13 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { LocalAuthGuard } from './auth/local-auth.guard';
 
 @ApiTags('Auth API')
 @Controller()
 export class AppController {
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @ApiBody({
