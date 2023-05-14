@@ -20,12 +20,15 @@ export class Post {
   title: string;
 
   @Column()
+  @ApiResponseProperty({ example: 'Example Description' })
   description: string;
 
   @Column()
+  @ApiResponseProperty({ example: 'https://example.com/poster.png' })
   imageLink: string;
 
   @Column({ type: 'timestamptz' })
+  @ApiResponseProperty({ example: '2023-05-14T10:00:00.000Z' })
   registerationDeadline: Date;
 
   @ManyToOne(() => User, (user) => user.posts)
