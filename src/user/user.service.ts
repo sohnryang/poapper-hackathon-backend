@@ -33,6 +33,10 @@ export class UserService {
     return this.userRepository.findOneBy({ id });
   }
 
+  findOneByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ username });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
     if (!this.userRepository.findOneBy({ id })) throw new NotFoundException();
     const user = new User();
