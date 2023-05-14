@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -38,7 +38,6 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
-    if (!this.userRepository.findOneBy({ id })) throw new NotFoundException();
     const user = new User();
     user.fullName = updateUserDto.fullName;
     user.phoneNumber = updateUserDto.phoneNumber;
