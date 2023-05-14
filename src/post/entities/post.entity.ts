@@ -1,4 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
 import {
   Column,
   Entity,
@@ -31,8 +32,14 @@ export class Post {
   @ApiResponseProperty({ example: '2023-05-14T10:00:00.000Z' })
   registerationDeadline: Date;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, { eager: true })
+  @Exclude()
   organizer: User;
+
+  @Expose()
+  get organizerId(): number {
+    return this.organizer.id;
+  }
 
   @ManyToMany(() => User, (user) => user.registeredEvents)
   @JoinTable()
