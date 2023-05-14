@@ -8,6 +8,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('PoApper Hackathon Backend')
     .setVersion('0.0')
+    .addBearerAuth()
     .build();
   const apiDocs = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, apiDocs);
