@@ -9,11 +9,15 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   NotFoundException,
+  UseGuards,
+  Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('User API')
 @Controller('user')
@@ -40,17 +44,27 @@ export class UserController {
     return user;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Request() req,
+  ) {
     const user = await this.userService.findOne(+id);
     if (!user) throw new NotFoundException();
+    if (req.user.id != id) throw new ForbiddenException();
     return this.userService.update(+id, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Request() req) {
     const user = await this.userService.findOne(+id);
     if (!user) throw new NotFoundException();
+    if (req.user.id != id) throw new ForbiddenException();
     return this.userService.remove(+id);
   }
 }
