@@ -20,6 +20,9 @@ export class Post {
   title: string;
 
   @Column()
+  description: string;
+
+  @Column()
   imageLink: string;
 
   @Column({ type: 'timestamptz' })
