@@ -48,7 +48,9 @@ export class UserController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
+    const user = await this.userService.findOne(+id);
+    if (!user) throw new NotFoundException();
     return this.userService.remove(+id);
   }
 }
