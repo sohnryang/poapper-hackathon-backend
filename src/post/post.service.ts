@@ -4,6 +4,7 @@ import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Connection, Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 
@@ -15,8 +16,8 @@ export class PostService {
     private connection: Connection,
   ) {}
 
-  async create(createPostDto: CreatePostDto, organizerId: number) {
-    const organizer = await this.userService.findOne(organizerId);
+  async create(createPostDto: CreatePostDto) {
+    const organizer = await this.userService.findOne(createPostDto.userId);
     const post = new Post();
     post.title = createPostDto.title;
     post.description = createPostDto.description;
@@ -52,11 +53,12 @@ export class PostService {
     await this.postRepository.delete(id);
   }
 
-  async registerUser(id: number, userId: number) {
+  async registerUser(id: number, createRegistrationDto: CreateRegistrationDto) {
     const post = await this.postRepository.findOneBy({ id });
     const registeredUsers = post.registeredUsers;
-    if (registeredUsers.find((u) => u.id == userId)) return;
-    const user = await this.userService.findOne(userId);
+    if (registeredUsers.find((u) => u.id == createRegistrationDto.userId))
+      return;
+    const user = await this.userService.findOne(createRegistrationDto.userId);
     registeredUsers.push(user);
     const newPost = this.connection.getRepository(Post).create();
     newPost.id = post.id;
@@ -64,12 +66,17 @@ export class PostService {
     await this.connection.getRepository(Post).save(newPost);
   }
 
-  async removeRegistration(id: number, userId: number) {
+  async removeRegistration(
+    id: number,
+    createRegistrationDto: CreateRegistrationDto,
+  ) {
     const post = await this.postRepository.findOneBy({ id });
     const registeredUsers = post.registeredUsers;
     const newPost = this.connection.getRepository(Post).create();
     newPost.id = post.id;
-    newPost.registeredUsers = registeredUsers.filter((u) => u.id != userId);
+    newPost.registeredUsers = registeredUsers.filter(
+      (u) => u.id != createRegistrationDto.userId,
+    );
     await this.connection.getRepository(Post).save(newPost);
   }
 }

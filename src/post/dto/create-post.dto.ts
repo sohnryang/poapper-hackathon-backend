@@ -3,6 +3,9 @@ import { Type } from 'class-transformer';
 import { IsDate } from 'class-validator';
 
 export class CreatePostDto {
+  @ApiProperty({ description: 'Current user ID' })
+  userId: number;
+
   @ApiProperty({ description: 'Title of post' })
   title: string;
 

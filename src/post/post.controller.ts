@@ -6,10 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
   Request,
   NotFoundException,
-  ForbiddenException,
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
@@ -17,17 +15,15 @@ import { Post as PostEntity } from './entities/post.entity';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { CreateRegistrationDto } from './dto/create-registration.dto';
 
 @ApiTags('Post API')
 @Controller('post')
@@ -35,14 +31,10 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create post' })
-  @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'Post created successfully.' })
-  @ApiForbiddenResponse({ description: "Editing other user's post." })
-  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
-  create(@Body() createPostDto: CreatePostDto, @Request() req) {
-    return this.postService.create(createPostDto, req.user.id);
+  create(@Body() createPostDto: CreatePostDto) {
+    return this.postService.create(createPostDto);
   }
 
   @Get()
@@ -69,52 +61,36 @@ export class PostController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Edit a post with ID' })
   @ApiOkResponse({ description: 'Edited successfully.' })
-  @ApiForbiddenResponse({ description: "Editing other user's post." })
-  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
   @ApiBearerAuth()
-  async update(
-    @Param('id') id: string,
-    @Body() updatePostDto: UpdatePostDto,
-    @Request() req,
-  ) {
+  async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
-    const userId = req.user.id;
-    if (userId != post.organizer.id) throw new ForbiddenException();
     return this.postService.update(+id, updatePostDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Remove a post with ID' })
   @ApiOkResponse({ description: 'Deleted successfully.' })
   @ApiNotFoundResponse({ description: 'Post with ID not found.' })
-  @ApiForbiddenResponse({ description: "Deleting other user's post." })
-  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
-  @ApiBearerAuth()
-  async remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id') id: string) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
-    const userId = req.user.id;
-    if (userId != post.organizer.id) throw new ForbiddenException();
     return this.postService.remove(+id);
   }
 
   @Post('register/:id')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Register to the event of a post with ID' })
   @ApiOkResponse({ description: 'Registered successfully.' })
   @ApiNotFoundResponse({ description: 'Post with ID not found.' })
-  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
-  @ApiBearerAuth()
-  async register(@Param('id') id: string, @Request() req) {
+  async register(
+    @Param('id') id: string,
+    createRegistrationDto: CreateRegistrationDto,
+  ) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
-    const userId = req.user.id;
-    return this.postService.registerUser(+id, userId);
+    return this.postService.registerUser(+id, createRegistrationDto);
   }
 
   @Get('register/:id')
@@ -125,12 +101,12 @@ export class PostController {
   }
 
   @Delete('register/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async removeRegistration(@Param('id') id: string, @Request() req) {
+  async removeRegistration(
+    @Param('id') id: string,
+    createRegistrationDto: CreateRegistrationDto,
+  ) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
-    const userId = req.user.id;
-    return this.postService.removeRegistration(+id, userId);
+    return this.postService.removeRegistration(+id, createRegistrationDto);
   }
 }
