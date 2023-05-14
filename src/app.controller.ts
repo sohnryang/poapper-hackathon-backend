@@ -47,15 +47,15 @@ export class AppController {
     description: 'Login succeeded.',
     schema: {
       properties: {
-        token: {
-          type: 'string',
-          description: 'JWT token',
+        id: {
+          type: 'number',
+          description: 'User ID',
         },
       },
     },
   })
   @ApiUnauthorizedResponse({ description: 'Invalid username or password.' })
   async login(@Request() req) {
-    return this.authService.login(req.user);
+    return req.user;
   }
 }
