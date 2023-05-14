@@ -9,24 +9,17 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   NotFoundException,
-  UseGuards,
-  Request,
-  ForbiddenException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
-  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from './entities/user.entity';
 
 @ApiTags('User API')
@@ -61,36 +54,22 @@ export class UserController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Edit a user with id' })
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Edited successfully.' })
   @ApiNotFoundResponse({ description: 'User wit ID not found.' })
-  @ApiForbiddenResponse({ description: 'Editing other user.' })
-  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-    @Request() req,
-  ) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const user = await this.userService.findOne(+id);
     if (!user) throw new NotFoundException();
-    if (req.user.id != id) throw new ForbiddenException();
     return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Delete a user with id' })
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Deleted successfully.' })
   @ApiNotFoundResponse({ description: 'User with ID not found.' })
-  @ApiForbiddenResponse({ description: 'Deleting other user.' })
-  @ApiUnauthorizedResponse({ description: 'Invalid token.' })
-  async remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id') id: string) {
     const user = await this.userService.findOne(+id);
     if (!user) throw new NotFoundException();
-    if (req.user.id != id) throw new ForbiddenException();
     return this.userService.remove(+id);
   }
 }

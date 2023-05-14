@@ -62,7 +62,6 @@ export class PostController {
   @Patch(':id')
   @ApiOperation({ summary: 'Edit a post with ID' })
   @ApiOkResponse({ description: 'Edited successfully.' })
-  @ApiBearerAuth()
   async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     const post = await this.postService.findOne(+id);
     if (!post) throw new NotFoundException();
