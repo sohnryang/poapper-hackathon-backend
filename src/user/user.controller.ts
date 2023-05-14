@@ -22,6 +22,7 @@ import {
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -34,12 +35,14 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create user' })
   @ApiCreatedResponse({ description: 'A new user is created.' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all user' })
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOkResponse({ description: 'Query succeeded.', type: User, isArray: true })
   findAll() {
@@ -48,6 +51,7 @@ export class UserController {
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
+  @ApiOperation({ summary: 'Get a user with id' })
   @ApiOkResponse({ description: 'Query succeeded.', type: User })
   @ApiNotFoundResponse({ description: 'User with ID not found.' })
   async findOne(@Param('id') id: string) {
@@ -58,6 +62,7 @@ export class UserController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Edit a user with id' })
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Edited successfully.' })
   @ApiNotFoundResponse({ description: 'User wit ID not found.' })
@@ -76,6 +81,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Delete a user with id' })
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Deleted successfully.' })
   @ApiNotFoundResponse({ description: 'User wit ID not found.' })
