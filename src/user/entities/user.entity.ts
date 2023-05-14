@@ -1,6 +1,13 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Post } from '../../post/entities/post.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -27,4 +34,10 @@ export class User {
   @Column()
   @Exclude()
   passwordHash: string;
+
+  @OneToMany(() => Post, (post) => post.organizer)
+  posts: Post[];
+
+  @ManyToMany(() => Post, (post) => post.registeredUsers)
+  registeredEvents: Post[];
 }
